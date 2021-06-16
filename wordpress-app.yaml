@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: wordpress
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://charts.bitnami.com/bitnami'
+    targetRevision: 11.0.15
+    helm:
+      values: |-
+        wordpressUsername: elie
+        wordpressPassword: myunsecurepassword
+        wordpressBlogName: Kubernetes example blog
+
+        replicaCount: 1
+
+        service:
+                  type: ClusterIP
+
+        ingress:
+                  enabled: true
+                  hostname: wordpress.hadrien.lab.doxx.fr
+                  pathType: Prefix
+                  tls: true
+                  certManager: true
+                  annotations:
+                    traefik.ingress.kubernetes.io/router.tls: "true"
+                    cert-manager.io/cluster-issuer: letsencrypt-prod
+                    kubernetes.io/ingress.class: traefik   
+    chart: wordpress
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: wordpress
+  syncPolicy:
+    automated: {}
